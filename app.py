@@ -286,8 +286,12 @@ def solve(file_path):
                     if col == "Ngày học":
                         if convert_to_datetime(theoDoiCu[col]) == theoDoi[col]:
                             cnt += 1
+                        else:
+                            break
                     elif theoDoiCu[col] == theoDoi[col]:
                         cnt += 1
+                    else:
+                        break
                 max_cnt = max(cnt, max_cnt)
                 if cnt == len(fixed_cols):
                     # print("--------------------Nếu đã có thì thay đổi trường thông tin")
@@ -295,7 +299,9 @@ def solve(file_path):
                     # Nếu đã có thì thay đổi trường thông tin
                     for col in columns:
                         if final_df.loc[index2, col] == None:
-                            final_df.loc[index2, col] = theoDoiCu[col] 
+                            final_df.loc[index2, col] = theoDoiCu[col]
+                    break
+                    
                 else:
                     cnt_theoDoi += 1
                     
