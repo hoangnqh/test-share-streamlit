@@ -7,10 +7,10 @@ import openpyxl
 from datetime import datetime
 
 def main():
-    st.title("Chương trình đọc tệp Excel và cho phép tải xuống")
+    st.title("Tạo/Cập nhật bảng \"Theo dõi\"")
 
     # Widget để người dùng tải lên tệp Excel
-    uploaded_file = st.file_uploader("Chọn tệp Excel", type=["xls", "xlsx"])
+    uploaded_file = st.file_uploader("Chọn tệp Excel đã trích xuất từ Base", type=["xls", "xlsx"])
 
     if uploaded_file is not None:
         # Đọc dữ liệu từ tệp Excel vào DataFrame
@@ -36,12 +36,13 @@ def download_link(df):
     buffer.seek(0)
 
     # Tạo đường dẫn tải xuống và trả về mã HTML cho liên kết tải xuống
-    href = f'<a href="data:application/octet-stream;base64,{base64.b64encode(buffer.read()).decode("utf-8")}" download="data.xlsx">Tải xuống tệp Excel</a>'
+    href = f'<a href="data:application/octet-stream;base64,{base64.b64encode(buffer.read()).decode("utf-8")}" download="Theo_doi.xlsx">Tải xuống tệp Excel kết quả</a>'
 
     # Giải phóng bộ đệm tạm thời
     buffer.close()
 
     return href
+
 
 def check_days(day1_str, day2_str):
     day1 = datetime.strptime(day1_str, "%Y/%m/%d")
@@ -62,9 +63,9 @@ def convert_to_datetime(date_str):
     except ValueError:
         return date_str
 
-def solve(uploaded_file):
+def solve(file_path):
     # Mở tệp Excel
-    wb = openpyxl.load_workbook('Final test Nhân Viên.xlsx', data_only=True)
+    wb = openpyxl.load_workbook(file_path, data_only=True)
 
     # Lấy danh sách tên các bảng
     sheet_names = wb.sheetnames
@@ -127,12 +128,12 @@ def solve(uploaded_file):
         "Ngày học", # (Type: Ngày)
         "Giờ học", # (Type: Một lựa chọn)
         "Ca học", # (Type: Một lựa chọn)
-        "Ngày giờ học", # ="Ngày học"+" "+"Giờ học" (Type: Nhiều dòng)
+        "Ngày, giờ, lớp học", # ="Ngày học"+" "+"Giờ học"+" "+"Lớp của buổi học" (Type: Nhiều dòng)
         "Thứ trong tuần", # (Type: Một lựa chọn)
         "Mã học viên", # (Type: Liên kết 1 chiều tới Mã học viên)
         "Loại", # 0 là "Học bù", 1 là "Học chính" (Type: Một lựa chọn)
         ################################################################################
-        "Có thể đi học", # Là học chính hoặc nếu học bù thì cùng ngày với ngày học bù của ngày học chính. (Type: Công thức)
+        "Đã chọn học bù", # Là học chính hoặc nếu học bù thì cùng ngày với ngày học bù của ngày học chính. (Type: Công thức)
         "Điểm danh", # "1" là đi học, "0" là nghỉ (Type: Một lựa chọn)
         "Kỷ luật", #
         "Hiểu bài", #
@@ -192,12 +193,12 @@ def solve(uploaded_file):
                         "Ngày học": buoiHocBu["Ngày học"], 
                         "Giờ học": gio_hoc[buoiHocBu["Giờ học"]], 
                         "Ca học": buoiHocBu["Buổi"], 
-                        "Ngày giờ học": buoiHocBu["Ngày học"]+" "+gio_hoc[buoiHocBu["Giờ học"]], # Viết code
+                        "Ngày, giờ, lớp học": buoiHocBu["Ngày học"]+" "+gio_hoc[buoiHocBu["Giờ học"]]+" "+buoiHocBu["Lớp"], # Viết code
                         "Thứ trong tuần": buoiHocBu["Thứ"], 
                         "Mã học viên": hocVien["Mã học viên"],
                         "Loại": "0", # Viết code
                         ######################################
-                        "Có thể đi học": None, # Công thức                       
+                        "Đã chọn học bù": None, # Công thức                       
                         "Điểm danh": None, 
                         "Kỷ luật": None, 
                         "Hiểu bài": None,
@@ -230,12 +231,12 @@ def solve(uploaded_file):
                 "Ngày học": buoiHoc["Ngày học"], 
                 "Giờ học": gio_hoc[buoiHoc["Giờ học"]], 
                 "Ca học": buoiHoc["Buổi"], 
-                "Ngày giờ học": buoiHoc["Ngày học"]+" "+gio_hoc[buoiHoc["Giờ học"]], # Viết code
+                "Ngày, giờ, lớp học": buoiHoc["Ngày học"]+" "+gio_hoc[buoiHoc["Giờ học"]]+" "+buoiHoc["Lớp"], # Viết code
                 "Thứ trong tuần": buoiHoc["Thứ"], 
                 "Mã học viên": hocVien["Mã học viên"],
                 "Loại": "1", # Viết code
                 ######################################
-                "Có thể đi học": None, # Công thức                       
+                "Đã chọn học bù": None, # Công thức                       
                 "Điểm danh": None, 
                 "Kỷ luật": None, 
                 "Hiểu bài": None,
@@ -264,45 +265,50 @@ def solve(uploaded_file):
         "Ngày học", # (Type: Ngày)
         "Giờ học", # (Type: Một lựa chọn)
         "Ca học", # (Type: Một lựa chọn)
-        "Ngày giờ học", # ="Ngày học"+" "+"Giờ học" (Type: Nhiều dòng)
+        "Ngày, giờ, lớp học", # ="Ngày học"+" "+"Giờ học" (Type: Nhiều dòng)
         "Thứ trong tuần", # (Type: Một lựa chọn)
         "Mã học viên", # (Type: Liên kết 1 chiều tới Mã học viên)
         "Loại", # 0 là "Học bù", 1 là "Học chính" (Type: Một lựa chọn)
     ]
 
+
+    # Sau này bổ xung thêm tính năng nếu lớp học đã kết thúc thì chỉ lấy ngày điểm danh và ngày học chính mà thôi cho file nhẹ hơn
+
     final_df = df.copy()
-    # Thêm thông tin từ file cũ
-    for index1, theoDoiCu in dict["Theo dõi"].iterrows():
-        cnt_theoDoi = 0
-        max_cnt = 0
-        for index2, theoDoi in df.iterrows():
-            cnt = 0
-            for col in fixed_cols:
-                if col == "Ngày học":
-                    if convert_to_datetime(theoDoiCu[col]) == theoDoi[col]:
+    if "Theo dõi" in dict:
+        # Thêm thông tin từ file cũ
+        for index1, theoDoiCu in dict["Theo dõi"].iterrows():
+            cnt_theoDoi = 0
+            max_cnt = 0
+            for index2, theoDoi in df.iterrows():
+                cnt = 0
+                for col in fixed_cols:
+                    if col == "Ngày học":
+                        if convert_to_datetime(theoDoiCu[col]) == theoDoi[col]:
+                            cnt += 1
+                    elif theoDoiCu[col] == theoDoi[col]:
                         cnt += 1
-                elif theoDoiCu[col] == theoDoi[col]:
-                    cnt += 1
-            max_cnt = max(cnt, max_cnt)
-            if cnt == len(fixed_cols):
-                # print("--------------------Nếu đã có thì thay đổi trường thông tin")
-                # print(theoDoiCu[col] )
-                # Nếu đã có thì thay đổi trường thông tin
-                for col in columns:
-                    if final_df.loc[index2, col] == None:
-                        final_df.loc[index2, col] = theoDoiCu[col] 
-            else:
-                cnt_theoDoi += 1
-                
-        if cnt_theoDoi ==  df.shape[0]:
-            # Nếu chưa có thì thêm vào cuối
-                new_row = {}
-                for col in columns:
-                    new_row[col] = theoDoiCu[col] 
-                new_df = pd.DataFrame([new_row])
-                final_df = pd.concat([final_df, new_df], ignore_index=True)
-                # print("--------------------Nếu chưa có thì thêm vào cuối")
-                
+                max_cnt = max(cnt, max_cnt)
+                if cnt == len(fixed_cols):
+                    # print("--------------------Nếu đã có thì thay đổi trường thông tin")
+                    # print(theoDoiCu[col] )
+                    # Nếu đã có thì thay đổi trường thông tin
+                    for col in columns:
+                        if final_df.loc[index2, col] == None:
+                            final_df.loc[index2, col] = theoDoiCu[col] 
+                else:
+                    cnt_theoDoi += 1
+                    
+            if cnt_theoDoi ==  df.shape[0]:
+                # Nếu chưa có thì thêm vào cuối
+                    new_row = {}
+                    for col in columns:
+                        new_row[col] = theoDoiCu[col] 
+                    new_df = pd.DataFrame([new_row])
+                    final_df = pd.concat([final_df, new_df], ignore_index=True)
+                    # print("--------------------Nếu chưa có thì thêm vào cuối")
+                    # print(theoDoiCu)
+            # print(max_cnt)
     return final_df
 
 if __name__ == "__main__":
